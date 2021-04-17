@@ -1,6 +1,8 @@
+import os
 from DataLoader import loader_raw
 import json
 import tqdm
+import numpy
 from rouge_score import rouge_scorer
 
 if __name__ == '__main__':
@@ -8,6 +10,8 @@ if __name__ == '__main__':
     train_data, val_data, test_data = loader_raw(appoint_part=[appoint_part])
     total_score = {}
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+    save_path = 'C:/ProjectData/Pretreatment/Step4.1_MultiOne/'
+    if not os.path.exists(save_path): os.makedirs(save_path)
 
     treat_data = None
     if appoint_part == 'train': treat_data = train_data
@@ -16,6 +20,8 @@ if __name__ == '__main__':
     assert treat_data is not None
 
     for treat_sample in tqdm.tqdm(treat_data):
+        if os.path.exists(os.path.join(save_path, treat_sample['ID'] + '.csv')): continue
+        file = open(os.path.join(save_path, treat_sample['ID'] + '.csv'), 'w')
         summary = treat_sample['Summary']
         sentence = treat_sample['Sentence']
 
@@ -30,4 +36,12 @@ if __name__ == '__main__':
         rouge_score = sorted(rouge_score, key=lambda x: x[-1], reverse=True)
         total_score[treat_sample['ID']] = rouge_score
 
-    json.dump(total_score, open('%s-Rouge-Candidate.json' % appoint_part, 'w'))
+        for indexX in range(numpy.shape(rouge_score)[0]):
+            for indexY in range(numpy.shape(rouge_score)[1]):
+                if indexY != 0: file.write(',')
+                file.write(str(rouge_score[indexX][indexY]))
+            file.write('\n')
+
+        file.close()
+
+    json.dump(total_score, open('%s-RougeLong-Candidate.json' % appoint_part, 'w'))

@@ -63,25 +63,61 @@ class MatchSum_AnotherModule(pytorch_pretrained_bert.modeling.BertPreTrainedMode
         self.embeddings = pytorch_pretrained_bert.modeling.BertEmbeddings(config)
         self.encoder = pytorch_pretrained_bert.modeling.BertEncoder(config)
         self.pooler = pytorch_pretrained_bert.modeling.BertPooler(config)
+        self.margin = 1E-2
         self.apply(self.init_bert_weights)
 
-    def forward(self, input_ids, token_type_ids=None, attention_mask=None, output_all_encoded_layers=True):
+    def __get_passage_vector(self, input_ids, token_type_ids=None, attention_mask=None):
         if attention_mask is None:
             attention_mask = torch.ones_like(input_ids)
         if token_type_ids is None:
             token_type_ids = torch.zeros_like(input_ids)
-
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
         extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)  # fp16 compatibility
         extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
 
         embedding_output = self.embeddings(input_ids, token_type_ids)
-        encoded_layers = self.encoder(embedding_output,
-                                      extended_attention_mask,
-                                      output_all_encoded_layers=output_all_encoded_layers)
-        sequence_output = encoded_layers[-1]
-        pooled_output = self.pooler(sequence_output)
+        encoded_layers = self.encoder(embedding_output, extended_attention_mask, output_all_encoded_layers=False)
+        pooled_output = self.pooler(encoded_layers[0])
         return pooled_output
+
+    def __get_loss(self, score, summary_score):
+        # equivalent to initializing TotalLoss to 0
+        # here is to avoid that some special samples will not go into the following for loop
+        ones = torch.ones(score.size()).cuda(score.device)
+        loss_func = torch.nn.MarginRankingLoss(0.0)
+        TotalLoss = loss_func(score, score, ones)
+
+        # candidate loss
+        n = score.size(1)
+        for i in range(1, n):
+            pos_score = score[:, :-i]
+            neg_score = score[:, i:]
+            pos_score = pos_score.contiguous().view(-1)
+            neg_score = neg_score.contiguous().view(-1)
+            ones = torch.ones(pos_score.size()).cuda(score.device)
+            loss_func = torch.nn.MarginRankingLoss(self.margin * i)
+            TotalLoss += loss_func(pos_score, neg_score, ones)
+
+        # gold summary loss
+        pos_score = summary_score.unsqueeze(-1).expand_as(score)
+        neg_score = score
+        pos_score = pos_score.contiguous().view(-1)
+        neg_score = neg_score.contiguous().view(-1)
+        ones = torch.ones(pos_score.size()).cuda(score.device)
+        loss_func = torch.nn.MarginRankingLoss(0.0)
+        TotalLoss += loss_func(pos_score, neg_score, ones)
+
+        return TotalLoss
+
+    def forward(self, passage_tokens, summary_tokens, candidate_tokens):
+        passage_vector = self.__get_passage_vector(passage_tokens)
+        summary_vector = self.__get_passage_vector(summary_tokens)
+        candidate_vector = self.__get_passage_vector(candidate_tokens, attention_mask=~(candidate_tokens == 0))
+
+        summary_score = torch.cosine_similarity(summary_vector, passage_vector, dim=-1)
+        candidate_score = torch.cosine_similarity(candidate_vector, passage_vector, dim=-1).unsqueeze(0)
+        loss = self.__get_loss(candidate_score, summary_score)
+        return loss, candidate_score
 
 
 class BertEmbeddingsExtend(torch.nn.Module):

@@ -1,0 +1,13 @@
+['club', 'ti', '##ju', '##ana', 'star', 'juan', 'ara', '##ngo', 'con', '##jured', 'memories', 'luis', 'suarez', 'in', 'his', 'team', "'", 's', '4', '-', '3', 'defeat', 'by', 'monterrey', 'in', 'the', 'mexican', 'league', '-', 'but', 'it', 'was', 'not', 'through', 'pro', '##di', '##gio', '##us', 'scoring', '.']
+['the', 'venezuelan', 'icon', 'ara', '##ngo', 'sank', 'his', 'teeth', 'into', 'the', 'shoulder', 'of', 'jesus', 'za', '##vel', '##a', 'as', 'his', 'temper', 'flared', 'in', 'the', 'defeat', '.']
+['he', 'was', 'not', 'booked', 'by', 'the', 'referee', 'but', 'could', 'face', 'a', 'heavy', 'retrospective', 'ban', '.']
+['juan', 'ara', '##ngo', '(', 'left', ')', 'bites', 'the', 'shoulder', 'of', 'opponent', 'jesus', 'za', '##vel', '##a', 'in', 'a', 'moment', 'of', 'madness']
+['za', '##val', '##a', 'holds', 'his', 'shoulder', 'after', 'being', 'bitten', 'by', 'ara', '##ngo', ',', 'in', 'the', 'game', 'za', '##val', '##a', "'", 's', 'side', 'won', '4', '-', '3', 'in', 'mexico']
+['za', '##val', '##a', 'shows', 'the', 'referee', 'the', 'mark', 'on', 'his', 'shoulder', 'after', 'being', 'bitter', '##n', 'by', 'ara', '##ngo']
+['ara', '##ngo', '(', 'right', ')', 'earlier', 'scored', 'a', 'magnificent', 'free', 'kick', 'to', 'bring', 'his', 'club', 'ti', '##ju', '##ana', 'team', 'level', 'against', 'monterrey']
+['ara', '##ngo', 'had', 'earlier', 'curled', 'in', 'a', 'magnificent', 'free', 'kick', 'for', 'his', 'team', 'to', 'bring', 'them', 'level', 'after', 'falling', '2', '-', '0', 'down', 'early', 'on', 'in', 'the', 'encounter', '.']
+['but', 'the', '34', '-', 'year', '-', 'old', 'overshadowed', 'his', 'goal', 'with', 'the', 'bite', 'as', 'television', 'cameras', 'picked', 'up', 'the', 'moment', 'of', 'madness', '.']
+['ara', '##ngo', 'spent', '10', 'years', 'playing', 'in', 'europe', ',', 'spending', 'five', 'seasons', 'each', 'at', 'real', 'mall', '##or', '##ca', 'in', 'spain', 'and', 'bo', '##rus', '##sia', 'mon', '##cheng', '##lad', '##bach', 'in', 'germany', '.', 'he', 'has', 'made', '121', 'appearances', 'for', 'venezuela', '.']
+[]
+
+进程已结束，退出代码 0
