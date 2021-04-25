@@ -7,10 +7,11 @@ from DataLoader import loader_match_sum
 CUDA_FLAG = True
 
 if __name__ == '__main__':
-    save_path = 'Result/MatchSum_Random8'
+    random_choose_number = 9
+    save_path = 'Result/MatchSum_Random%d' % (random_choose_number + 1)
     if not os.path.exists(save_path): os.makedirs(save_path)
 
-    train_loader, val_loader, test_loader = loader_match_sum()
+    train_loader, val_loader, test_loader = loader_match_sum(random_choose_number=random_choose_number)
     model = MatchSum_AnotherModule.from_pretrained('bert-base-uncased')
     if CUDA_FLAG: model.cuda()
     optimizer = torch.optim.Adam(params=model.parameters(), lr=1E-5)
@@ -24,6 +25,7 @@ if __name__ == '__main__':
                     batchTextTokens = batchTextTokens.cuda()
                     batchSummaryTokens = batchSummaryTokens.cuda()
                     batchCandidateTokens = batchCandidateTokens.cuda()
+                if batchCandidateTokens.size(0) != random_choose_number + 1: continue
                 loss, score = model(batchTextTokens, batchSummaryTokens, batchCandidateTokens)
 
                 loss_value = loss.cpu().detach().numpy()

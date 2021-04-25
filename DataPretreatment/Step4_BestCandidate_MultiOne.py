@@ -6,11 +6,11 @@ import numpy
 from rouge_score import rouge_scorer
 
 if __name__ == '__main__':
-    appoint_part = 'train'
+    appoint_part = 'test'
     train_data, val_data, test_data = loader_raw(appoint_part=[appoint_part])
     total_score = {}
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
-    save_path = 'C:/ProjectData/Pretreatment/Step4.1_MultiOne/'
+    save_path = 'C:/ProjectData/Pretreatment/Step4.1_MultiOne_Test_3Sentences/'
     if not os.path.exists(save_path): os.makedirs(save_path)
 
     treat_data = None
@@ -28,11 +28,13 @@ if __name__ == '__main__':
         rouge_score = []
         for indexX in range(len(sentence)):
             for indexY in range(indexX + 1, len(sentence)):
-                predict = sentence[indexX] + ' ' + sentence[indexY]
-                score = scorer.score(target=summary, prediction=predict)
-                rouge_score.append(
-                    [indexX, indexY, score['rouge1'].fmeasure, score['rouge2'].fmeasure, score['rougeL'].fmeasure,
-                     score['rouge1'].fmeasure + score['rouge2'].fmeasure + score['rougeL'].fmeasure])
+                for indexZ in range(indexY + 1, len(sentence)):
+                    predict = sentence[indexX] + ' ' + sentence[indexY] + ' ' + sentence[indexZ]
+                    score = scorer.score(target=summary, prediction=predict)
+                    rouge_score.append(
+                        [indexX, indexY, indexZ, score['rouge1'].fmeasure, score['rouge2'].fmeasure,
+                         score['rougeL'].fmeasure,
+                         score['rouge1'].fmeasure + score['rouge2'].fmeasure + score['rougeL'].fmeasure])
         rouge_score = sorted(rouge_score, key=lambda x: x[-1], reverse=True)
         total_score[treat_sample['ID']] = rouge_score
 

@@ -1,29 +1,38 @@
 import os
-import tqdm
+import pickle
 import numpy
-from DataLoader import loader_bert_sum, loader_raw
-from Tools import rouge_1_calculation
+from DataLoader import loader_raw
+from rouge_score import rouge_scorer
 
 if __name__ == '__main__':
-    train_loader, val_loader, test_loader = loader_bert_sum(appoint_part=['test'], batch_size=1)
-    _, _, test_data = loader_raw(appoint_part=['test'])
-    load_path = 'C:/ProjectData/0000/'
+    load_path = 'Result/BertSum/'
+    appoint_part = 'test'
+    top_n_number = 2
+    train_data, val_data, test_data = loader_raw(appoint_part=[appoint_part])
+    scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
 
-    choose_top_n = 2
-    total_rouge = 0.0
-    for batchIndex, [batchText, batchMask, batchPosition, batchLabel] in tqdm.tqdm(enumerate(test_loader)):
-        data = numpy.genfromtxt(fname=os.path.join(load_path, '%06d.csv' % batchIndex), dtype=float, delimiter=',')
-        score = []
-        for index, sample in enumerate(data):
-            score.append([index, sample[1]])
-        score = sorted(score, key=lambda x: x[-1], reverse=True)
+    if appoint_part == 'val': treat_data = val_data
+    if appoint_part == 'test': treat_data = test_data
 
-        predict = ''
-        for index in range(min(choose_top_n, len(test_data[batchIndex]['Sentence']))):
-            predict += test_data[batchIndex]['Sentence'][index] + ' '
-        label = test_data[batchIndex]['Summary']
+    for epoch_index in range(18):
+        predict_score = pickle.load(open(os.path.join(load_path, '%s-%04d.pkl' % (appoint_part, epoch_index)), 'rb'))
+        total_score = [0, 0, 0]
+        for batch_index in range(1, len(predict_score)):
+            batch_score = []
+            for sentence_index in range(len(predict_score[batch_index])):
+                batch_score.append([sentence_index, predict_score[batch_index][sentence_index][1]])
+            batch_score = sorted(batch_score, key=lambda x: x[-1], reverse=True)
 
-        # rouge_result = rouge_1_calculation(predict[0:len(label)].split(' '), label.split(' '))
-        rouge_result = rouge_1_calculation(predict.split(' '), label.split(' '))
-        total_rouge += rouge_result
-    print(total_rouge / len(test_data))
+            print(treat_data[batch_index]['Summary'])
+            print(treat_data[batch_index]['Sentence'][batch_score[0][0]])
+            print(treat_data[batch_index]['Sentence'][batch_score[1][0]])
+            print(treat_data[batch_index]['Sentence'][batch_score[2][0]])
+            exit()
+            predict_sentence = treat_data[batch_index]['Sentence'][batch_score[0][0]] + ' ' + \
+                               treat_data[batch_index]['Sentence'][batch_score[1][0]] + \
+                               treat_data[batch_index]['Sentence'][batch_score[2][0]]
+            score = scorer.score(target=treat_data[batch_index]['Summary'], prediction=predict_sentence)
+            total_score[0] += score['rouge1'].fmeasure
+            total_score[1] += score['rouge2'].fmeasure
+            total_score[2] += score['rougeL'].fmeasure
+        print(total_score)

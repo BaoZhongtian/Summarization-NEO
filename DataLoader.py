@@ -71,9 +71,12 @@ class CollateMatchSumAnother:
         # print(numpy.shape(xs), numpy.shape(ys), numpy.shape(zs), numpy.shape(ids), numpy.shape(sentence_tokens))
         candidate_tokens = []
 
-        random_choose_id = numpy.arange(1, numpy.shape(ids)[0])
-        numpy.random.shuffle(random_choose_id)
-        random_choose_id = sorted(random_choose_id[0:self.random_choose_number])
+        # random_choose_id = numpy.arange(1, numpy.shape(ids)[0])
+        # numpy.random.shuffle(random_choose_id)
+        # random_choose_id = sorted(random_choose_id[0:self.random_choose_number])
+
+        random_choose_id = numpy.arange(1, min(self.random_choose_number + 1, numpy.shape(ids)[0]))
+
         candidate_tokens.append(zs)
 
         for index in range(len(random_choose_id)):
